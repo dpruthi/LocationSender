@@ -1,6 +1,9 @@
 package com.deep.locationsender;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -15,6 +18,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.SmsManager;
@@ -36,6 +40,32 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     Sensor sensor;
     ProgressDialog progressDialog;
     String strLoc = "";
+
+    NotificationManager notificationManager;
+    NotificationCompat.Builder builder;
+    Notification notification;
+
+
+
+    void showNotification(){
+        notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+
+        builder = new NotificationCompat.Builder(this);
+        builder.setContentTitle("Message Sent");
+        // builder.setContentText("Location is: "+latitude+" - "+longitude);
+        builder.setSmallIcon(R.drawable.msgsent);
+        builder.setDefaults(Notification.DEFAULT_ALL); // VIBRATE Permission must be written in Manifest
+
+        Intent intent = new Intent(MainActivity.this,MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this,222,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+
+        builder.setContentIntent(pendingIntent);
+        notification = builder.build();
+
+        notificationManager.notify(101,notification);
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,6 +147,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             // String msg = "Device Shake Done !!";
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(phone,null,msg,null,null);
+            showNotification();
 
             sensorManager.unregisterListener(this);
         }else{
